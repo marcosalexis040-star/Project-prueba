@@ -36,6 +36,9 @@
     };
   </script>
 
+  <!-- Generador de QR real (cliente) -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+
   <!-- Tipografía -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -204,16 +207,29 @@
             <div class="absolute left-1/2 top-1 z-30 h-2 w-2 -translate-x-1/2 rounded-full border border-white/50 bg-black/30"></div>
 
             <div class="relative flex h-full gap-1.5">
-              <!-- Portada del álbum (se actualiza en vivo) -->
+              <!-- Portada del álbum (texto en vivo o portada REAL de Spotify) -->
               <div id="previewCover" class="relative flex-1 overflow-hidden rounded-md bg-gradient-to-br from-spotify-green via-emerald-700 to-zinc-900 transition-colors duration-500">
+                <!-- Portada REAL de Spotify (aparece cuando se detecta) -->
+                <img id="previewCoverArt" alt="Portada del álbum" class="absolute inset-0 z-[1] h-full w-full object-cover opacity-0 transition-opacity duration-500" />
                 <!-- textura / brillo -->
-                <div class="absolute inset-0 bg-gradient-to-tr from-white/15 via-transparent to-black/40 mix-blend-overlay"></div>
-                <!-- degradado inferior para legibilidad -->
-                <div class="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
-                <!-- TEXTO QUE SE ACTUALIZA EN VIVO -->
-                <div class="absolute inset-0 z-10 flex flex-col justify-end p-3">
-                  <span id="previewArtist" class="block truncate text-base font-black leading-tight tracking-tight text-white drop-shadow">Tu Artista</span>
-                  <span id="previewSong" class="mt-0.5 block truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-spotify-greenLight">Tu canción favorita</span>
+                <div class="absolute inset-0 z-[2] bg-gradient-to-tr from-white/15 via-transparent to-black/40 mix-blend-overlay"></div>
+                <!-- capa de texto (se oculta al cargar una portada real) -->
+                <div id="coverTextLayer" class="absolute inset-0 z-[3] transition-opacity duration-300">
+                  <div class="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                  <div class="absolute inset-0 flex flex-col justify-end p-3">
+                    <span id="previewArtist" class="block truncate text-base font-black leading-tight tracking-tight text-white drop-shadow">Tu Artista</span>
+                    <span id="previewSong" class="mt-0.5 block truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-spotify-greenLight">Tu canción favorita</span>
+                  </div>
+                </div>
+                <!-- spinner de carga -->
+                <div id="coverLoading" class="absolute inset-0 z-[4] hidden items-center justify-center bg-black/40 backdrop-blur-sm">
+                  <div class="h-6 w-6 animate-spin rounded-full border-2 border-white/30 border-t-spotify-green"></div>
+                </div>
+                <!-- QR impreso (se genera desde el link/canción) -->
+                <div id="qrSticker" class="absolute bottom-1.5 right-1.5 z-[5] hidden">
+                  <div class="rounded-[5px] bg-white p-[3px] shadow-lg ring-1 ring-black/10">
+                    <img id="qrImg" alt="QR de tu canción" class="block h-9 w-9 rounded-[2px]" />
+                  </div>
                 </div>
               </div>
 
@@ -233,7 +249,7 @@
           <span class="absolute -bottom-2 -right-2 z-30 rounded-md bg-black/85 px-2 py-0.5 text-[10px] font-bold text-spotify-green ring-1 ring-white/10">R150</span>
         </div>
 
-        <p class="mt-4 text-[11px] text-spotify-gray">Así se verá tu llavero ✨</p>
+        <p id="previewNote" class="mt-4 text-center text-[11px] text-spotify-gray">Así se verá tu llavero ✨</p>
 
         <!-- Estilo / género de la portada (categorías reales de su IG) -->
         <div class="mt-5 w-full">
@@ -552,8 +568,167 @@
     const spotifyInput = document.getElementById('spotify');
     const spotifyCheck = document.getElementById('spotifyCheck');
     spotifyInput.addEventListener('input', () => {
-      const ok = /open\.spotify\.com\/(track|album|playlist|intl-[a-z]+\/track)/i.test(spotifyInput.value);
+      const ok = spotifyUrlOk(spotifyInput.value.trim());
       spotifyCheck.classList.toggle('hidden', !ok);
+    });
+
+    // ================= Portada REAL de Spotify + QR dinámico =================
+    const previewCoverArt = document.getElementById('previewCoverArt');
+    const coverTextLayer = document.getElementById('coverTextLayer');
+    const coverLoading = document.getElementById('coverLoading');
+    const qrSticker = document.getElementById('qrSticker');
+    const qrImg = document.getElementById('qrImg');
+    const previewNote = document.getElementById('previewNote');
+
+    // Catálogo de portadas REALES obtenidas vía el servidor MCP de Spotify
+    // (alta resolución 640px). Permite mostrar la carátula al escribir el nombre,
+    // sin depender de la red. Para cualquier otro álbum se usa el link (oEmbed).
+    const SPOTIFY_CATALOG = [
+      { t:'Un Verano Sin Ti', a:'Bad Bunny', img:'ab67616d0000b27349d694203245f241a1bcaa72', id:'3RQQmkQEvNCY4prGKE6oc5' },
+      { t:'DeBÍ TiRAR MáS FOToS', a:'Bad Bunny', img:'ab67616d0000b273bbd45c8d36e0e045ef640411', id:'5K79FLRUCSysQnVESLcTdb' },
+      { t:'un x100to', a:'Grupo Frontera Bad Bunny', img:'ab67616d0000b273716c0b0ad51594ff788b5f06', id:'7aGzSSUD8S6IhPCsZSiuMT' },
+      { t:'Greatest Hits', a:'The Cure', img:'ab67616d0000b2730447ba639949dd26478decf6', id:'34ozkv3AkFksZD8srOmOrX' },
+      { t:'Disintegration', a:'The Cure', img:'ab67616d0000b273641c33269d4aad8c9e77eae5', id:'0A13JySVHzBoRZFk2o89Wl' },
+      { t:'Femme Fatale', a:'Mon Laferte', img:'ab67616d0000b2730b4c75d5dde5ed7ca003e27d', id:'7q2GxttTFDWOihvnSWdwWw' },
+      { t:'Femme Fatale Vol 2', a:'Mon Laferte', img:'ab67616d0000b273adb5f1c1c6ee3a2cb24c991b', id:'29L7pXN58eLAlfhaAquyXh' },
+      { t:'Midnight Memories', a:'One Direction', img:'ab67616d0000b2733cf0191cca87a4bc7e34bc4a', id:'7p1fX8aUySrBdx4WSYspOu' },
+      { t:'Four', a:'One Direction', img:'ab67616d0000b27334a29f220057810cce98e1b4', id:'4gCNyS7pidfK3rKWhB3JOY' },
+      { t:'Made In The A M', a:'One Direction', img:'ab67616d0000b2734a075ca70ae4143a37eb4fbe', id:'1gMxiQQSg5zeu4htBosASY' },
+    ];
+
+    function spotifyUrlOk(v){ return /open\.spotify\.com\/(intl-[a-z]+\/)?(track|album|playlist)\/[A-Za-z0-9]+/i.test(v || ''); }
+    function normalize(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+    function imgUrl(code){ return 'https://i.scdn.co/image/' + code; }
+    function showLoading(on){ coverLoading.classList.toggle('hidden', !on); coverLoading.classList.toggle('flex', on); }
+
+    let coverActive = false;       // hay una portada real visible
+    let currentLinkCover = false;  // la portada viene de un link de Spotify
+    let catalogQRTarget = '';      // link para el QR cuando solo se escribe el nombre
+
+    function setCover(url, note){
+      previewCoverArt.onload = () => {
+        showLoading(false);
+        previewCoverArt.classList.remove('opacity-0');
+        coverTextLayer.classList.add('opacity-0');
+        coverActive = true;
+        if (note) previewNote.textContent = note;
+      };
+      previewCoverArt.onerror = () => { showLoading(false); };
+      previewCoverArt.src = url;
+    }
+    function clearCover(){
+      previewCoverArt.classList.add('opacity-0');
+      coverTextLayer.classList.remove('opacity-0');
+      coverActive = false;
+      previewNote.textContent = 'Así se verá tu llavero ✨';
+    }
+
+    // ----- QR (real con la librería; respaldo "simulado" si no carga) -----
+    function realQR(text){
+      try {
+        if (typeof qrcode === 'function') {
+          const qr = qrcode(0, 'M'); qr.addData(text); qr.make();
+          return qr.createDataURL(4, 0);
+        }
+      } catch (e) {}
+      return null;
+    }
+    function simQR(text){ // patrón determinista tipo QR (respaldo offline)
+      const n = 25, cell = 4, size = n * cell;
+      const c = document.createElement('canvas'); c.width = size; c.height = size;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
+      let h = 5381; for (let i = 0; i < text.length; i++) h = ((h * 33) ^ text.charCodeAt(i)) >>> 0;
+      const rnd = () => { h = (h * 1103515245 + 12345) & 0x7fffffff; return h; };
+      const finder = (x, y) => x < 7 && y < 7 || x >= n - 7 && y < 7 || x < 7 && y >= n - 7;
+      ctx.fillStyle = '#000';
+      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+        if (finder(x, y)) continue;
+        if (rnd() % 2 === 0) ctx.fillRect(x * cell, y * cell, cell, cell);
+      }
+      [[0,0],[n-7,0],[0,n-7]].forEach(([fx,fy]) => {
+        ctx.fillRect(fx*cell, fy*cell, 7*cell, 7*cell);
+        ctx.fillStyle='#fff'; ctx.fillRect((fx+1)*cell,(fy+1)*cell,5*cell,5*cell);
+        ctx.fillStyle='#000'; ctx.fillRect((fx+2)*cell,(fy+2)*cell,3*cell,3*cell);
+      });
+      return c.toDataURL();
+    }
+    function setQR(target){
+      if (!target){ qrSticker.classList.add('hidden'); return; }
+      qrImg.src = realQR(target) || simQR(target);
+      qrSticker.classList.remove('hidden');
+    }
+
+    // ----- Portada por LINK de Spotify (oEmbed: portada real de cualquier canción) -----
+    async function fetchSpotifyCover(url){
+      try {
+        showLoading(true);
+        const res = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(url));
+        if (!res.ok) throw new Error('oembed');
+        const data = await res.json();
+        currentLinkCover = true;
+        if (data.thumbnail_url) setCover(data.thumbnail_url, 'Portada real + QR de tu canción ✓');
+        if (!artistInput.value.trim() && data.title) { artistInput.value = data.title; previewArtist.textContent = data.title; }
+        setQR(url);
+      } catch (e) {
+        showLoading(false);
+        setQR(url); // aunque falle la portada, el QR del link sí se genera
+        if (!coverActive) previewNote.textContent = 'QR de tu canción generado ✓';
+      }
+    }
+
+    // ----- Portada por NOMBRE: catálogo MCP primero, luego iTunes como respaldo -----
+    function findInCatalog(q){
+      const nq = normalize(q);
+      if (nq.length < 3) return null;
+      return SPOTIFY_CATALOG.find(it => {
+        const t = normalize(it.t), a = normalize(it.a), both = a + ' ' + t;
+        return both.includes(nq) || nq.includes(t) || (t.length > 3 && t.includes(nq)) || a.includes(nq) || nq.includes(a);
+      }) || null;
+    }
+    async function iTunesCover(q){
+      if (normalize(q).length < 3) { if (!currentLinkCover) clearCover(); return; }
+      try {
+        showLoading(true);
+        const res = await fetch('https://itunes.apple.com/search?term=' + encodeURIComponent(q) + '&entity=album&limit=1');
+        const data = await res.json();
+        showLoading(false);
+        if (!currentLinkCover && data.results && data.results[0]) {
+          setCover(data.results[0].artworkUrl100.replace('100x100', '600x600'), 'Portada encontrada ✓');
+        } else if (!currentLinkCover) { clearCover(); }
+      } catch (e) { showLoading(false); if (!currentLinkCover) clearCover(); }
+    }
+    function tryNameCover(){
+      if (currentLinkCover) return; // un link siempre gana
+      const q = artistInput.value.trim();
+      const hit = findInCatalog(q);
+      if (hit) {
+        setCover(imgUrl(hit.img), 'Portada real de Spotify ✓');
+        catalogQRTarget = 'https://open.spotify.com/album/' + hit.id;
+        if (!spotifyUrlOk(spotifyInput.value.trim())) setQR(catalogQRTarget);
+        return;
+      }
+      catalogQRTarget = '';
+      iTunesCover(q);
+    }
+
+    // ----- Disparadores (con debounce, fluido en celular) -----
+    let coverTimer, nameTimer;
+    spotifyInput.addEventListener('input', () => {
+      const v = spotifyInput.value.trim();
+      clearTimeout(coverTimer);
+      if (spotifyUrlOk(v)) {
+        coverTimer = setTimeout(() => fetchSpotifyCover(v), 450);
+      } else {
+        if (currentLinkCover) { currentLinkCover = false; clearCover(); }
+        setQR(catalogQRTarget || '');
+        clearTimeout(nameTimer);
+        nameTimer = setTimeout(tryNameCover, 200);
+      }
+    });
+    artistInput.addEventListener('input', () => {
+      clearTimeout(nameTimer);
+      nameTimer = setTimeout(tryNameCover, 550);
     });
 
     // ---------- Paquetes / precios dinámicos ----------
