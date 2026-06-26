@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plan Simple SLP · Llaveros de Mini CD personalizados</title>
+  <meta name="description" content="Plan Simple SLP — Llaveros de Mini CD musicales personalizados en San Luis Potosí. Convierte tu canción favorita en un llavero único." />
+
+  <!-- Tailwind CSS desde CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            spotify: {
+              green: '#1DB954',
+              greenLight: '#1ED760',
+              black: '#0a0a0a',
+              dark: '#121212',
+              card: '#181818',
+              cardHover: '#282828',
+              gray: '#b3b3b3',
+            },
+          },
+          fontFamily: {
+            sans: ['Montserrat', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            glow: '0 0 24px rgba(29, 185, 84, 0.35)',
+            glowSoft: '0 0 60px rgba(29, 185, 84, 0.15)',
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Tipografía -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { -webkit-tap-highlight-color: transparent; }
+
+    /* Scrollbar discreto estilo Spotify */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: #282828; border-radius: 8px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+
+    /* Animación de aparición */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-up { animation: fadeUp 0.7s ease both; }
+
+    /* Gradiente animado de fondo */
+    @keyframes spinSlow { to { transform: rotate(360deg); } }
+    .animate-spin-slow { animation: spinSlow 14s linear infinite; }
+
+    /* Disco vinilo girando */
+    @keyframes spinDisc { to { transform: rotate(360deg); } }
+    .animate-disc { animation: spinDisc 6s linear infinite; }
+
+    /* Brillo pulsante */
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 18px rgba(29,185,84,0.25); }
+      50% { box-shadow: 0 0 34px rgba(29,185,84,0.55); }
+    }
+    .animate-pulse-glow { animation: pulseGlow 3s ease-in-out infinite; }
+  </style>
+</head>
+
+<body class="bg-spotify-black text-white font-sans antialiased selection:bg-spotify-green selection:text-black">
+
+  <!-- Fondo decorativo -->
+  <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute -top-32 -right-24 h-80 w-80 rounded-full bg-spotify-green/20 blur-[120px]"></div>
+    <div class="absolute top-1/3 -left-24 h-72 w-72 rounded-full bg-spotify-green/10 blur-[120px]"></div>
+    <div class="absolute bottom-0 right-1/4 h-72 w-72 rounded-full bg-emerald-500/10 blur-[120px]"></div>
+  </div>
+
+  <!-- ============ HEADER ============ -->
+  <header class="sticky top-0 z-50 border-b border-white/5 bg-spotify-black/80 backdrop-blur-xl">
+    <div class="mx-auto flex max-w-md items-center justify-between px-5 py-4">
+      <div class="flex items-center gap-2.5">
+        <!-- Logo: disco -->
+        <div class="relative grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-spotify-green to-emerald-600 shadow-glow">
+          <div class="h-3 w-3 rounded-full bg-spotify-black ring-2 ring-white/30"></div>
+        </div>
+        <div class="leading-none">
+          <h1 class="text-base font-extrabold tracking-tight">Plan Simple <span class="text-spotify-green">SLP</span></h1>
+          <p class="mt-0.5 text-[10px] font-medium uppercase tracking-[0.2em] text-spotify-gray">San Luis Potosí</p>
+        </div>
+      </div>
+      <a href="#crear" class="rounded-full bg-spotify-green px-4 py-2 text-xs font-bold text-black transition active:scale-95 hover:bg-spotify-greenLight">
+        Crear
+      </a>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-md px-5 pb-28">
+
+    <!-- ============ HERO ============ -->
+    <section class="relative pt-12 text-center animate-fade-up">
+      <span class="inline-flex items-center gap-2 rounded-full border border-spotify-green/30 bg-spotify-green/10 px-3 py-1 text-[11px] font-semibold text-spotify-greenLight">
+        <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-spotify-green"></span>
+        Hecho a mano en SLP
+      </span>
+
+      <h2 class="mt-6 text-4xl font-black leading-[1.05] tracking-tight">
+        Tu canción<br />
+        <span class="bg-gradient-to-r from-spotify-green via-emerald-400 to-spotify-greenLight bg-clip-text text-transparent">
+          favorita
+        </span><br />
+        en un llavero.
+      </h2>
+
+      <p class="mx-auto mt-4 max-w-xs text-sm leading-relaxed text-spotify-gray">
+        Llaveros de Mini CD musicales personalizados. Escanea, escucha y presume tu momento favorito donde sea.
+      </p>
+
+      <!-- Mini CD ilustrativo -->
+      <div class="relative mx-auto mt-10 h-52 w-52">
+        <div class="absolute inset-0 animate-pulse-glow rounded-full"></div>
+        <div class="absolute inset-0 grid place-items-center">
+          <div class="animate-disc relative h-48 w-48 rounded-full bg-gradient-to-br from-zinc-700 via-zinc-900 to-black shadow-2xl">
+            <!-- surcos del CD -->
+            <div class="absolute inset-2 rounded-full border border-white/5"></div>
+            <div class="absolute inset-5 rounded-full border border-white/5"></div>
+            <div class="absolute inset-8 rounded-full border border-white/5"></div>
+            <!-- reflejo holográfico -->
+            <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-spotify-green/30 via-transparent to-fuchsia-500/20"></div>
+            <!-- centro -->
+            <div class="absolute inset-0 grid place-items-center">
+              <div class="grid h-16 w-16 place-items-center rounded-full bg-spotify-black ring-4 ring-zinc-800">
+                <div class="h-5 w-5 rounded-full bg-zinc-700 ring-2 ring-black"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- cadena/aro flotando -->
+        <div class="absolute -right-1 -top-1 h-10 w-10 rounded-full border-[3px] border-spotify-green/70"></div>
+      </div>
+
+      <div class="mt-10 flex items-center justify-center gap-6 text-center">
+        <div>
+          <p class="text-2xl font-black text-spotify-green">+500</p>
+          <p class="text-[11px] uppercase tracking-wider text-spotify-gray">Llaveros</p>
+        </div>
+        <div class="h-8 w-px bg-white/10"></div>
+        <div>
+          <p class="text-2xl font-black text-spotify-green">48h</p>
+          <p class="text-[11px] uppercase tracking-wider text-spotify-gray">Entrega</p>
+        </div>
+        <div class="h-8 w-px bg-white/10"></div>
+        <div>
+          <p class="text-2xl font-black text-spotify-green">100%</p>
+          <p class="text-[11px] uppercase tracking-wider text-spotify-gray">Único</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FORMULARIO ============ -->
+    <section id="crear" class="mt-16 scroll-mt-24 animate-fade-up">
+      <div class="mb-6 text-center">
+        <p class="text-[11px] font-bold uppercase tracking-[0.25em] text-spotify-green">Personaliza</p>
+        <h3 class="mt-2 text-2xl font-black tracking-tight">Diseña tu Mini CD</h3>
+        <p class="mt-2 text-sm text-spotify-gray">Cuéntanos qué quieres y nosotros lo hacemos realidad.</p>
+      </div>
+
+      <form id="orderForm" class="space-y-5 rounded-3xl border border-white/5 bg-spotify-card/70 p-6 shadow-glowSoft backdrop-blur">
+
+        <!-- Artista / Álbum -->
+        <div>
+          <label for="artist" class="mb-2 flex items-center gap-2 text-sm font-semibold">
+            <svg class="h-4 w-4 text-spotify-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19a3 3 0 11-6 0 3 3 0 016 0zM21 16a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Nombre del Artista / Álbum
+          </label>
+          <input id="artist" name="artist" type="text" required
+            placeholder="Ej. Bad Bunny — Un Verano Sin Ti"
+            class="w-full rounded-xl border border-white/10 bg-spotify-black px-4 py-3.5 text-sm text-white placeholder-spotify-gray/60 outline-none transition focus:border-spotify-green focus:ring-2 focus:ring-spotify-green/30" />
+        </div>
+
+        <!-- Canción favorita -->
+        <div>
+          <label for="song" class="mb-2 flex items-center gap-2 text-sm font-semibold">
+            <svg class="h-4 w-4 text-spotify-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V5l12-2v13M9 9l12-2M9 9v10a2 2 0 11-3-1.7M21 16a2 2 0 11-3-1.7"/></svg>
+            Canción Favorita
+          </label>
+          <input id="song" name="song" type="text" required
+            placeholder="Ej. Tití Me Preguntó"
+            class="w-full rounded-xl border border-white/10 bg-spotify-black px-4 py-3.5 text-sm text-white placeholder-spotify-gray/60 outline-none transition focus:border-spotify-green focus:ring-2 focus:ring-spotify-green/30" />
+        </div>
+
+        <!-- Link de Spotify -->
+        <div>
+          <label for="spotify" class="mb-2 flex items-center gap-2 text-sm font-semibold">
+            <svg class="h-4 w-4 text-spotify-green" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424a.622.622 0 01-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.622.622 0 11-.277-1.213c3.809-.871 7.077-.496 9.712 1.114a.622.622 0 01.207.856zm1.223-2.722a.778.778 0 01-1.07.257c-2.688-1.652-6.786-2.131-9.965-1.166a.778.778 0 11-.452-1.49c3.632-1.102 8.147-.568 11.23 1.329a.778.778 0 01.257 1.07zm.105-2.835c-3.223-1.914-8.54-2.09-11.618-1.156a.933.933 0 11-.542-1.786c3.532-1.072 9.404-.865 13.115 1.338a.933.933 0 01-.955 1.604z"/></svg>
+            Link de Spotify
+          </label>
+          <div class="relative">
+            <input id="spotify" name="spotify" type="url"
+              placeholder="https://open.spotify.com/track/..."
+              class="w-full rounded-xl border border-white/10 bg-spotify-black px-4 py-3.5 pr-11 text-sm text-white placeholder-spotify-gray/60 outline-none transition focus:border-spotify-green focus:ring-2 focus:ring-spotify-green/30" />
+            <span id="spotifyCheck" class="absolute right-3.5 top-1/2 hidden -translate-y-1/2 text-spotify-green">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            </span>
+          </div>
+          <p class="mt-1.5 text-[11px] text-spotify-gray">Pega el enlace de la canción para generar tu código QR escaneable.</p>
+        </div>
+
+        <!-- ===== Selección de tipo de llavero ===== -->
+        <div>
+          <label class="mb-3 flex items-center gap-2 text-sm font-semibold">
+            <svg class="h-4 w-4 text-spotify-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+            Tipo de Llavero
+          </label>
+
+          <div class="grid grid-cols-2 gap-3">
+            <!-- Opción: cadena de bolitas -->
+            <button type="button" data-keychain="Cadena de bolitas"
+              class="keychain-opt group relative flex flex-col items-center gap-3 rounded-2xl border-2 border-white/10 bg-spotify-black p-4 text-center transition active:scale-95">
+              <span class="check-badge absolute right-2 top-2 hidden grid h-5 w-5 place-items-center rounded-full bg-spotify-green text-black">
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              </span>
+              <!-- ilustración bolitas -->
+              <svg class="h-14 w-14 text-spotify-gray transition group-hover:text-white" viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="44" r="14" stroke="currentColor" stroke-width="3"/>
+                <circle cx="32" cy="8" r="3" fill="currentColor"/>
+                <circle cx="32" cy="16" r="3" fill="currentColor"/>
+                <circle cx="32" cy="24" r="3" fill="currentColor"/>
+                <circle cx="32" cy="44" r="4" fill="currentColor"/>
+              </svg>
+              <span class="text-xs font-bold">Cadena de bolitas</span>
+              <span class="text-[10px] text-spotify-gray">Estilo moderno</span>
+            </button>
+
+            <!-- Opción: aro tradicional -->
+            <button type="button" data-keychain="Aro tradicional"
+              class="keychain-opt group relative flex flex-col items-center gap-3 rounded-2xl border-2 border-white/10 bg-spotify-black p-4 text-center transition active:scale-95">
+              <span class="check-badge absolute right-2 top-2 hidden grid h-5 w-5 place-items-center rounded-full bg-spotify-green text-black">
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              </span>
+              <!-- ilustración aro -->
+              <svg class="h-14 w-14 text-spotify-gray transition group-hover:text-white" viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="40" r="16" stroke="currentColor" stroke-width="3"/>
+                <circle cx="32" cy="14" r="9" stroke="currentColor" stroke-width="4"/>
+              </svg>
+              <span class="text-xs font-bold">Aro tradicional</span>
+              <span class="text-[10px] text-spotify-gray">Estilo clásico</span>
+            </button>
+          </div>
+          <input type="hidden" id="keychainType" name="keychainType" required />
+        </div>
+
+        <!-- Botón enviar -->
+        <button type="submit"
+          class="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-spotify-green py-4 text-sm font-extrabold text-black shadow-glow transition hover:bg-spotify-greenLight active:scale-[0.98]">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Pedir mi llavero
+        </button>
+
+        <!-- Mensaje de confirmación -->
+        <div id="confirm" class="hidden rounded-2xl border border-spotify-green/40 bg-spotify-green/10 p-4 text-center">
+          <p class="text-sm font-bold text-spotify-greenLight">¡Listo! 🎉</p>
+          <p id="confirmText" class="mt-1 text-xs text-spotify-gray"></p>
+        </div>
+      </form>
+    </section>
+
+    <!-- ============ CÓMO FUNCIONA ============ -->
+    <section class="mt-16 animate-fade-up">
+      <div class="mb-6 text-center">
+        <p class="text-[11px] font-bold uppercase tracking-[0.25em] text-spotify-green">Fácil y rápido</p>
+        <h3 class="mt-2 text-2xl font-black tracking-tight">¿Cómo funciona?</h3>
+      </div>
+      <div class="space-y-3">
+        <div class="flex items-start gap-4 rounded-2xl border border-white/5 bg-spotify-card/60 p-4">
+          <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-spotify-green text-sm font-black text-black">1</span>
+          <div>
+            <p class="text-sm font-bold">Elige tu canción</p>
+            <p class="text-xs text-spotify-gray">Comparte el artista, la rola y el link de Spotify.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 rounded-2xl border border-white/5 bg-spotify-card/60 p-4">
+          <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-spotify-green text-sm font-black text-black">2</span>
+          <div>
+            <p class="text-sm font-bold">Diseñamos tu Mini CD</p>
+            <p class="text-xs text-spotify-gray">Imprimimos la portada y el QR que reproduce tu canción.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 rounded-2xl border border-white/5 bg-spotify-card/60 p-4">
+          <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-spotify-green text-sm font-black text-black">3</span>
+          <div>
+            <p class="text-sm font-bold">Lo recibes en 48h</p>
+            <p class="text-xs text-spotify-gray">Entrega en San Luis Potosí o envío a todo México.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="border-t border-white/5 bg-spotify-dark">
+    <div class="mx-auto max-w-md px-5 py-8 text-center">
+      <div class="flex items-center justify-center gap-2.5">
+        <div class="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-spotify-green to-emerald-600">
+          <div class="h-2 w-2 rounded-full bg-spotify-black ring-2 ring-white/30"></div>
+        </div>
+        <span class="font-extrabold">Plan Simple <span class="text-spotify-green">SLP</span></span>
+      </div>
+      <p class="mt-3 text-xs text-spotify-gray">Llaveros de Mini CD musicales personalizados.<br />Hechos con 💚 en San Luis Potosí.</p>
+      <div class="mt-5 flex items-center justify-center gap-4">
+        <a href="#" aria-label="Instagram" class="text-spotify-gray transition hover:text-spotify-green">
+          <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </a>
+        <a href="#" aria-label="WhatsApp" class="text-spotify-gray transition hover:text-spotify-green">
+          <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-1.215zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.149-.174.198-.298.298-.496.099-.198.05-.372-.025-.521-.074-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        </a>
+        <a href="#" aria-label="TikTok" class="text-spotify-gray transition hover:text-spotify-green">
+          <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+        </a>
+      </div>
+      <p class="mt-6 text-[11px] text-spotify-gray/60">© 2026 Plan Simple SLP. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- ============ JS interactivo ============ -->
+  <script>
+    // --- Selección de tipo de llavero ---
+    const options = document.querySelectorAll('.keychain-opt');
+    const keychainInput = document.getElementById('keychainType');
+
+    options.forEach((opt) => {
+      opt.addEventListener('click', () => {
+        options.forEach((o) => {
+          o.classList.remove('border-spotify-green', 'shadow-glow', 'bg-spotify-cardHover');
+          o.classList.add('border-white/10', 'bg-spotify-black');
+          o.querySelector('.check-badge').classList.add('hidden');
+          o.querySelector('.check-badge').classList.remove('grid');
+        });
+        opt.classList.add('border-spotify-green', 'shadow-glow', 'bg-spotify-cardHover');
+        opt.classList.remove('border-white/10', 'bg-spotify-black');
+        const badge = opt.querySelector('.check-badge');
+        badge.classList.remove('hidden');
+        badge.classList.add('grid');
+        keychainInput.value = opt.dataset.keychain;
+      });
+    });
+
+    // --- Validación visual del link de Spotify ---
+    const spotifyInput = document.getElementById('spotify');
+    const spotifyCheck = document.getElementById('spotifyCheck');
+    spotifyInput.addEventListener('input', () => {
+      const ok = /open\.spotify\.com\/(track|album|playlist)/i.test(spotifyInput.value);
+      spotifyCheck.classList.toggle('hidden', !ok);
+    });
+
+    // --- Envío del formulario ---
+    const form = document.getElementById('orderForm');
+    const confirm = document.getElementById('confirm');
+    const confirmText = document.getElementById('confirmText');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      if (!keychainInput.value) {
+        confirm.classList.remove('hidden', 'border-spotify-green/40', 'bg-spotify-green/10');
+        confirm.classList.add('border-red-500/40', 'bg-red-500/10');
+        confirm.querySelector('p').textContent = 'Falta un detalle ⚠️';
+        confirm.querySelector('p').className = 'text-sm font-bold text-red-400';
+        confirmText.textContent = 'Por favor selecciona un tipo de llavero.';
+        confirm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const artist = document.getElementById('artist').value;
+      const song = document.getElementById('song').value;
+
+      confirm.classList.remove('hidden', 'border-red-500/40', 'bg-red-500/10');
+      confirm.classList.add('border-spotify-green/40', 'bg-spotify-green/10');
+      confirm.querySelector('p').textContent = '¡Listo! 🎉';
+      confirm.querySelector('p').className = 'text-sm font-bold text-spotify-greenLight';
+      confirmText.textContent = `Recibimos tu pedido de "${song}" de ${artist} en formato ${keychainInput.value}. Te contactaremos pronto para confirmar.`;
+      confirm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      form.querySelector('button[type="submit"]').textContent = '✓ Pedido enviado';
+    });
+  </script>
+</body>
+</html>
