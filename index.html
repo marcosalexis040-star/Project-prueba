@@ -29,6 +29,7 @@
           boxShadow: {
             glow: '0 0 24px rgba(29, 185, 84, 0.35)',
             glowSoft: '0 0 60px rgba(29, 185, 84, 0.15)',
+            glowStrong: '0 0 0 2px rgba(29,185,84,0.9), 0 0 30px rgba(29,185,84,0.55)',
           },
         },
       },
@@ -57,13 +58,9 @@
     }
     .animate-fade-up { animation: fadeUp 0.7s ease both; }
 
-    /* Gradiente animado de fondo */
-    @keyframes spinSlow { to { transform: rotate(360deg); } }
-    .animate-spin-slow { animation: spinSlow 14s linear infinite; }
-
     /* Disco vinilo girando */
     @keyframes spinDisc { to { transform: rotate(360deg); } }
-    .animate-disc { animation: spinDisc 6s linear infinite; }
+    .animate-disc { animation: spinDisc 8s linear infinite; }
 
     /* Brillo pulsante */
     @keyframes pulseGlow {
@@ -71,6 +68,46 @@
       50% { box-shadow: 0 0 34px rgba(29,185,84,0.55); }
     }
     .animate-pulse-glow { animation: pulseGlow 3s ease-in-out infinite; }
+
+    /* ===== Glassmorphism + borde con gradiente premium ===== */
+    .glass {
+      background: rgba(255, 255, 255, 0.045);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+    }
+    .grad-border {
+      position: relative;
+    }
+    .grad-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(29,185,84,0.55), rgba(255,255,255,0.10) 45%, rgba(29,185,84,0.10));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    /* Borde verde neón intenso para el paquete seleccionado */
+    .pkg-selected {
+      box-shadow: 0 0 0 2px rgba(29,185,84,0.95), 0 0 28px rgba(29,185,84,0.5);
+    }
+
+    /* Reflejo "brillo" que recorre el case transparente */
+    @keyframes sheen {
+      0% { transform: translateX(-120%) skewX(-18deg); }
+      60%, 100% { transform: translateX(220%) skewX(-18deg); }
+    }
+    .sheen::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; height: 100%; width: 45%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+      animation: sheen 5.5s ease-in-out infinite;
+      pointer-events: none;
+    }
   </style>
 </head>
 
@@ -123,30 +160,7 @@
         Llaveros de Mini CD musicales personalizados. Escanea, escucha y presume tu momento favorito donde sea.
       </p>
 
-      <!-- Mini CD ilustrativo -->
-      <div class="relative mx-auto mt-10 h-52 w-52">
-        <div class="absolute inset-0 animate-pulse-glow rounded-full"></div>
-        <div class="absolute inset-0 grid place-items-center">
-          <div class="animate-disc relative h-48 w-48 rounded-full bg-gradient-to-br from-zinc-700 via-zinc-900 to-black shadow-2xl">
-            <!-- surcos del CD -->
-            <div class="absolute inset-2 rounded-full border border-white/5"></div>
-            <div class="absolute inset-5 rounded-full border border-white/5"></div>
-            <div class="absolute inset-8 rounded-full border border-white/5"></div>
-            <!-- reflejo holográfico -->
-            <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-spotify-green/30 via-transparent to-fuchsia-500/20"></div>
-            <!-- centro -->
-            <div class="absolute inset-0 grid place-items-center">
-              <div class="grid h-16 w-16 place-items-center rounded-full bg-spotify-black ring-4 ring-zinc-800">
-                <div class="h-5 w-5 rounded-full bg-zinc-700 ring-2 ring-black"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- cadena/aro flotando -->
-        <div class="absolute -right-1 -top-1 h-10 w-10 rounded-full border-[3px] border-spotify-green/70"></div>
-      </div>
-
-      <div class="mt-10 flex items-center justify-center gap-6 text-center">
+      <div class="mt-8 flex items-center justify-center gap-6 text-center">
         <div>
           <p class="text-2xl font-black text-spotify-green">+500</p>
           <p class="text-[11px] uppercase tracking-wider text-spotify-gray">Llaveros</p>
@@ -164,15 +178,65 @@
       </div>
     </section>
 
-    <!-- ============ FORMULARIO ============ -->
+    <!-- ============ PERSONALIZA (Preview + Formulario) ============ -->
     <section id="crear" class="mt-16 scroll-mt-24 animate-fade-up">
       <div class="mb-6 text-center">
         <p class="text-[11px] font-bold uppercase tracking-[0.25em] text-spotify-green">Personaliza</p>
         <h3 class="mt-2 text-2xl font-black tracking-tight">Diseña tu Mini CD</h3>
-        <p class="mt-2 text-sm text-spotify-gray">Cuéntanos qué quieres y nosotros lo hacemos realidad.</p>
+        <p class="mt-2 text-sm text-spotify-gray">Escribe abajo y míralo cobrar vida al instante.</p>
       </div>
 
-      <form id="orderForm" class="space-y-5 rounded-3xl border border-white/5 bg-spotify-card/70 p-6 shadow-glowSoft backdrop-blur">
+      <!-- ===== PREVIEW INTERACTIVO EN VIVO ===== -->
+      <div class="mb-7 flex flex-col items-center">
+        <span class="mb-4 inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-spotify-greenLight">
+          <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-spotify-green"></span>
+          Vista previa en vivo
+        </span>
+
+        <!-- Llavero transparente (case acrílico) -->
+        <div class="relative w-60">
+          <!-- Cadena de bolitas hacia el aro -->
+          <div class="absolute left-1/2 top-0 z-20 flex -translate-x-1/2 -translate-y-[58%] flex-col items-center gap-[3px]">
+            <div class="h-5 w-5 rounded-full border-[3px] border-zinc-400/80 bg-zinc-300/10"></div>
+            <div class="h-1.5 w-1.5 rounded-full bg-zinc-400"></div>
+            <div class="h-1.5 w-1.5 rounded-full bg-zinc-400"></div>
+            <div class="h-1.5 w-1.5 rounded-full bg-zinc-400"></div>
+          </div>
+
+          <!-- Carcasa acrílica transparente con glassmorphism -->
+          <div class="sheen relative aspect-square overflow-hidden rounded-[2rem] border border-white/25 bg-white/5 p-4 shadow-2xl backdrop-blur-md">
+            <!-- agujerito de la carcasa -->
+            <div class="absolute left-1/2 top-2 h-2.5 w-2.5 -translate-x-1/2 rounded-full border border-white/40 bg-black/40"></div>
+
+            <!-- Mini CD -->
+            <div id="previewDisc" class="animate-disc relative mt-1 aspect-square w-full overflow-hidden rounded-full shadow-xl">
+              <!-- portada (album art generada por gradiente) -->
+              <div id="previewCover" class="absolute inset-0 bg-gradient-to-br from-spotify-green via-emerald-700 to-zinc-900"></div>
+              <!-- reflejo holográfico -->
+              <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-white/10 via-transparent to-fuchsia-500/20 mix-blend-screen"></div>
+              <!-- degradado inferior para legibilidad del texto -->
+              <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/40 to-transparent"></div>
+
+              <!-- TEXTO QUE SE ACTUALIZA EN VIVO -->
+              <div class="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center px-5 pb-9 text-center">
+                <span id="previewArtist" class="block w-full truncate text-[15px] font-black leading-tight tracking-tight text-white drop-shadow">Tu Artista</span>
+                <span id="previewSong" class="mt-0.5 block w-full truncate text-[10px] font-medium uppercase tracking-[0.18em] text-spotify-greenLight">Tu canción favorita</span>
+              </div>
+
+              <!-- centro del CD -->
+              <div class="absolute inset-0 z-20 grid place-items-center">
+                <div class="grid h-12 w-12 place-items-center rounded-full bg-spotify-black/95 ring-4 ring-zinc-800">
+                  <div class="h-4 w-4 rounded-full bg-zinc-700 ring-2 ring-black"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="mt-3 text-[11px] text-spotify-gray">Así se verá tu llavero ✨</p>
+      </div>
+
+      <!-- ===== FORMULARIO (glassmorphism) ===== -->
+      <form id="orderForm" class="grad-border space-y-5 rounded-3xl glass p-6 shadow-glowSoft">
 
         <!-- Artista / Álbum -->
         <div>
@@ -180,9 +244,9 @@
             <svg class="h-4 w-4 text-spotify-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19a3 3 0 11-6 0 3 3 0 016 0zM21 16a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             Nombre del Artista / Álbum
           </label>
-          <input id="artist" name="artist" type="text" required
+          <input id="artist" name="artist" type="text" required maxlength="28"
             placeholder="Ej. Bad Bunny — Un Verano Sin Ti"
-            class="w-full rounded-xl border border-white/10 bg-spotify-black px-4 py-3.5 text-sm text-white placeholder-spotify-gray/60 outline-none transition focus:border-spotify-green focus:ring-2 focus:ring-spotify-green/30" />
+            class="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder-spotify-gray/60 outline-none transition focus:border-spotify-green focus:ring-2 focus:ring-spotify-green/30" />
         </div>
 
         <!-- Canción favorita -->
@@ -191,9 +255,9 @@
             <svg class="h-4 w-4 text-spotify-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V5l12-2v13M9 9l12-2M9 9v10a2 2 0 11-3-1.7M21 16a2 2 0 11-3-1.7"/></svg>
             Canción Favorita
           </label>
-          <input id="song" name="song" type="text" required
+          <input id="song" name="song" type="text" required maxlength="34"
             placeholder="Ej. Tití Me Preguntó"
-            class="w-full rounded-xl border border-white/10 bg-spotify-black px-4 py-3.5 text-sm text-white placeholder-spotify-gray/60 outline-none transition focus:border-spotify-green focus:ring-2 focus:ring-spotify-green/30" />
+            class="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder-spotify-gray/60 outline-none transition focus:border-spotify-green focus:ring-2 focus:ring-spotify-green/30" />
         </div>
 
         <!-- Link de Spotify -->
@@ -205,7 +269,7 @@
           <div class="relative">
             <input id="spotify" name="spotify" type="url"
               placeholder="https://open.spotify.com/track/..."
-              class="w-full rounded-xl border border-white/10 bg-spotify-black px-4 py-3.5 pr-11 text-sm text-white placeholder-spotify-gray/60 outline-none transition focus:border-spotify-green focus:ring-2 focus:ring-spotify-green/30" />
+              class="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3.5 pr-11 text-sm text-white placeholder-spotify-gray/60 outline-none transition focus:border-spotify-green focus:ring-2 focus:ring-spotify-green/30" />
             <span id="spotifyCheck" class="absolute right-3.5 top-1/2 hidden -translate-y-1/2 text-spotify-green">
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
             </span>
@@ -223,11 +287,10 @@
           <div class="grid grid-cols-2 gap-3">
             <!-- Opción: cadena de bolitas -->
             <button type="button" data-keychain="Cadena de bolitas"
-              class="keychain-opt group relative flex flex-col items-center gap-3 rounded-2xl border-2 border-white/10 bg-spotify-black p-4 text-center transition active:scale-95">
+              class="keychain-opt group relative flex flex-col items-center gap-3 rounded-2xl border-2 border-white/10 bg-black/40 p-4 text-center transition active:scale-95">
               <span class="check-badge absolute right-2 top-2 hidden grid h-5 w-5 place-items-center rounded-full bg-spotify-green text-black">
                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
               </span>
-              <!-- ilustración bolitas -->
               <svg class="h-14 w-14 text-spotify-gray transition group-hover:text-white" viewBox="0 0 64 64" fill="none">
                 <circle cx="32" cy="44" r="14" stroke="currentColor" stroke-width="3"/>
                 <circle cx="32" cy="8" r="3" fill="currentColor"/>
@@ -241,11 +304,10 @@
 
             <!-- Opción: aro tradicional -->
             <button type="button" data-keychain="Aro tradicional"
-              class="keychain-opt group relative flex flex-col items-center gap-3 rounded-2xl border-2 border-white/10 bg-spotify-black p-4 text-center transition active:scale-95">
+              class="keychain-opt group relative flex flex-col items-center gap-3 rounded-2xl border-2 border-white/10 bg-black/40 p-4 text-center transition active:scale-95">
               <span class="check-badge absolute right-2 top-2 hidden grid h-5 w-5 place-items-center rounded-full bg-spotify-green text-black">
                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
               </span>
-              <!-- ilustración aro -->
               <svg class="h-14 w-14 text-spotify-gray transition group-hover:text-white" viewBox="0 0 64 64" fill="none">
                 <circle cx="32" cy="40" r="16" stroke="currentColor" stroke-width="3"/>
                 <circle cx="32" cy="14" r="9" stroke="currentColor" stroke-width="4"/>
@@ -256,20 +318,100 @@
           </div>
           <input type="hidden" id="keychainType" name="keychainType" required />
         </div>
+      </form>
+    </section>
 
-        <!-- Botón enviar -->
-        <button type="submit"
-          class="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-spotify-green py-4 text-sm font-extrabold text-black shadow-glow transition hover:bg-spotify-greenLight active:scale-[0.98]">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          Pedir mi llavero
+    <!-- ============ PAQUETES / PRECIOS DINÁMICOS ============ -->
+    <section id="paquetes" class="mt-16 scroll-mt-24 animate-fade-up">
+      <div class="mb-6 text-center">
+        <p class="text-[11px] font-bold uppercase tracking-[0.25em] text-spotify-green">Paquetes</p>
+        <h3 class="mt-2 text-2xl font-black tracking-tight">Elige tu paquete</h3>
+        <p class="mt-2 text-sm text-spotify-gray">Entre más pidas, más ahorras 💚</p>
+      </div>
+
+      <div class="space-y-3">
+        <!-- 1 Mini CD -->
+        <button type="button" data-pkg="1 Mini CD" data-price="150"
+          class="pkg-opt grad-border flex w-full items-center justify-between rounded-2xl glass p-4 text-left transition active:scale-[0.99]">
+          <div class="flex items-center gap-4">
+            <div class="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/5">
+              <svg class="h-6 w-6 text-spotify-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/></svg>
+            </div>
+            <div>
+              <p class="text-sm font-extrabold">1 Mini CD</p>
+              <p class="text-[11px] text-spotify-gray">Ideal para regalar uno</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-lg font-black">$150</p>
+            <span class="pkg-check hidden text-[10px] font-bold text-spotify-green">✓ Elegido</span>
+          </div>
         </button>
 
-        <!-- Mensaje de confirmación -->
-        <div id="confirm" class="hidden rounded-2xl border border-spotify-green/40 bg-spotify-green/10 p-4 text-center">
-          <p class="text-sm font-bold text-spotify-greenLight">¡Listo! 🎉</p>
-          <p id="confirmText" class="mt-1 text-xs text-spotify-gray"></p>
+        <!-- 2 Mini CDs -->
+        <button type="button" data-pkg="2 Mini CDs" data-price="250"
+          class="pkg-opt grad-border relative flex w-full items-center justify-between rounded-2xl glass p-4 text-left transition active:scale-[0.99]">
+          <span class="absolute -top-2.5 left-4 rounded-full bg-spotify-green px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-black shadow-glow">¡Más vendido!</span>
+          <div class="flex items-center gap-4">
+            <div class="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/5">
+              <svg class="h-6 w-6 text-spotify-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="12" r="7"/><circle cx="9" cy="12" r="2"/><path d="M16 5.2a7 7 0 010 13.6"/></svg>
+            </div>
+            <div>
+              <p class="text-sm font-extrabold">2 Mini CDs</p>
+              <p class="text-[11px] text-spotify-gray">El favorito de todos</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-[11px] font-medium text-spotify-gray line-through">$300</p>
+            <p class="-mt-0.5 text-lg font-black">$250</p>
+            <span class="pkg-check hidden text-[10px] font-bold text-spotify-green">✓ Elegido</span>
+          </div>
+        </button>
+
+        <!-- 4 Mini CDs -->
+        <button type="button" data-pkg="4 Mini CDs" data-price="480"
+          class="pkg-opt grad-border relative flex w-full items-center justify-between rounded-2xl glass p-4 text-left transition active:scale-[0.99]">
+          <span class="absolute -top-2.5 left-4 rounded-full bg-gradient-to-r from-emerald-400 to-spotify-green px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-black shadow-glow">¡Mejor valor!</span>
+          <div class="flex items-center gap-4">
+            <div class="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/5">
+              <svg class="h-6 w-6 text-spotify-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="4.5"/><circle cx="16" cy="8" r="4.5"/><circle cx="8" cy="16" r="4.5"/><circle cx="16" cy="16" r="4.5"/></svg>
+            </div>
+            <div>
+              <p class="text-sm font-extrabold">4 Mini CDs</p>
+              <p class="text-[11px] text-spotify-gray">Para toda la banda</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-[11px] font-medium text-spotify-gray line-through">$600</p>
+            <p class="-mt-0.5 text-lg font-black">$480</p>
+            <span class="pkg-check hidden text-[10px] font-bold text-spotify-green">✓ Elegido</span>
+          </div>
+        </button>
+      </div>
+
+      <input type="hidden" id="pkgName" />
+      <input type="hidden" id="pkgPrice" />
+
+      <!-- Total a pagar -->
+      <div class="grad-border mt-5 flex items-center justify-between rounded-2xl glass px-5 py-4">
+        <div>
+          <p class="text-[11px] uppercase tracking-[0.2em] text-spotify-gray">Total a pagar</p>
+          <p id="totalLabel" class="text-xs text-spotify-gray">Selecciona un paquete</p>
         </div>
-      </form>
+        <p id="totalAmount" class="text-3xl font-black text-spotify-green">$0</p>
+      </div>
+
+      <!-- ===== BOTÓN WHATSAPP ===== -->
+      <button type="button" id="whatsappBtn"
+        class="mt-5 flex w-full items-center justify-center gap-3 rounded-full bg-[#25D366] py-4 text-sm font-extrabold text-black shadow-[0_0_28px_rgba(37,211,102,0.45)] transition hover:brightness-110 active:scale-[0.98]">
+        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-1.215zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.149-.174.198-.298.298-.496.099-.198.05-.372-.025-.521-.074-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        Pedir por WhatsApp
+      </button>
+
+      <!-- Aviso de validación -->
+      <div id="formAlert" class="mt-3 hidden rounded-2xl border border-amber-400/40 bg-amber-400/10 p-3 text-center text-xs font-medium text-amber-300"></div>
+
+      <p class="mt-3 text-center text-[11px] text-spotify-gray">Al enviar, abriremos WhatsApp con tu pedido listo para confirmar 💬</p>
     </section>
 
     <!-- ============ CÓMO FUNCIONA ============ -->
@@ -279,21 +421,21 @@
         <h3 class="mt-2 text-2xl font-black tracking-tight">¿Cómo funciona?</h3>
       </div>
       <div class="space-y-3">
-        <div class="flex items-start gap-4 rounded-2xl border border-white/5 bg-spotify-card/60 p-4">
+        <div class="grad-border flex items-start gap-4 rounded-2xl glass p-4">
           <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-spotify-green text-sm font-black text-black">1</span>
           <div>
             <p class="text-sm font-bold">Elige tu canción</p>
             <p class="text-xs text-spotify-gray">Comparte el artista, la rola y el link de Spotify.</p>
           </div>
         </div>
-        <div class="flex items-start gap-4 rounded-2xl border border-white/5 bg-spotify-card/60 p-4">
+        <div class="grad-border flex items-start gap-4 rounded-2xl glass p-4">
           <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-spotify-green text-sm font-black text-black">2</span>
           <div>
             <p class="text-sm font-bold">Diseñamos tu Mini CD</p>
             <p class="text-xs text-spotify-gray">Imprimimos la portada y el QR que reproduce tu canción.</p>
           </div>
         </div>
-        <div class="flex items-start gap-4 rounded-2xl border border-white/5 bg-spotify-card/60 p-4">
+        <div class="grad-border flex items-start gap-4 rounded-2xl glass p-4">
           <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-spotify-green text-sm font-black text-black">3</span>
           <div>
             <p class="text-sm font-bold">Lo recibes en 48h</p>
@@ -319,7 +461,7 @@
         <a href="#" aria-label="Instagram" class="text-spotify-gray transition hover:text-spotify-green">
           <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
         </a>
-        <a href="#" aria-label="WhatsApp" class="text-spotify-gray transition hover:text-spotify-green">
+        <a href="https://wa.me/524445726996" target="_blank" rel="noopener" aria-label="WhatsApp" class="text-spotify-gray transition hover:text-spotify-green">
           <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-1.215zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.149-.174.198-.298.298-.496.099-.198.05-.372-.025-.521-.074-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
         </a>
         <a href="#" aria-label="TikTok" class="text-spotify-gray transition hover:text-spotify-green">
@@ -332,7 +474,22 @@
 
   <!-- ============ JS interactivo ============ -->
   <script>
-    // --- Selección de tipo de llavero ---
+    const WHATSAPP_NUMBER = '524445726996'; // 444 572 6996 (San Luis Potosí, MX)
+
+    // ---------- Preview en vivo: Artista / Álbum + Canción ----------
+    const artistInput = document.getElementById('artist');
+    const songInput = document.getElementById('song');
+    const previewArtist = document.getElementById('previewArtist');
+    const previewSong = document.getElementById('previewSong');
+
+    artistInput.addEventListener('input', () => {
+      previewArtist.textContent = artistInput.value.trim() || 'Tu Artista';
+    });
+    songInput.addEventListener('input', () => {
+      previewSong.textContent = songInput.value.trim() || 'Tu canción favorita';
+    });
+
+    // ---------- Selección de tipo de llavero ----------
     const options = document.querySelectorAll('.keychain-opt');
     const keychainInput = document.getElementById('keychainType');
 
@@ -340,12 +497,13 @@
       opt.addEventListener('click', () => {
         options.forEach((o) => {
           o.classList.remove('border-spotify-green', 'shadow-glow', 'bg-spotify-cardHover');
-          o.classList.add('border-white/10', 'bg-spotify-black');
-          o.querySelector('.check-badge').classList.add('hidden');
-          o.querySelector('.check-badge').classList.remove('grid');
+          o.classList.add('border-white/10', 'bg-black/40');
+          const b = o.querySelector('.check-badge');
+          b.classList.add('hidden');
+          b.classList.remove('grid');
         });
         opt.classList.add('border-spotify-green', 'shadow-glow', 'bg-spotify-cardHover');
-        opt.classList.remove('border-white/10', 'bg-spotify-black');
+        opt.classList.remove('border-white/10', 'bg-black/40');
         const badge = opt.querySelector('.check-badge');
         badge.classList.remove('hidden');
         badge.classList.add('grid');
@@ -353,43 +511,80 @@
       });
     });
 
-    // --- Validación visual del link de Spotify ---
+    // ---------- Validación visual del link de Spotify ----------
     const spotifyInput = document.getElementById('spotify');
     const spotifyCheck = document.getElementById('spotifyCheck');
     spotifyInput.addEventListener('input', () => {
-      const ok = /open\.spotify\.com\/(track|album|playlist)/i.test(spotifyInput.value);
+      const ok = /open\.spotify\.com\/(track|album|playlist|intl-[a-z]+\/track)/i.test(spotifyInput.value);
       spotifyCheck.classList.toggle('hidden', !ok);
     });
 
-    // --- Envío del formulario ---
-    const form = document.getElementById('orderForm');
-    const confirm = document.getElementById('confirm');
-    const confirmText = document.getElementById('confirmText');
+    // ---------- Paquetes / precios dinámicos ----------
+    const pkgOptions = document.querySelectorAll('.pkg-opt');
+    const pkgName = document.getElementById('pkgName');
+    const pkgPrice = document.getElementById('pkgPrice');
+    const totalAmount = document.getElementById('totalAmount');
+    const totalLabel = document.getElementById('totalLabel');
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+    function selectPackage(opt) {
+      pkgOptions.forEach((o) => {
+        o.classList.remove('pkg-selected');
+        o.querySelector('.pkg-check').classList.add('hidden');
+      });
+      opt.classList.add('pkg-selected');
+      opt.querySelector('.pkg-check').classList.remove('hidden');
 
-      if (!keychainInput.value) {
-        confirm.classList.remove('hidden', 'border-spotify-green/40', 'bg-spotify-green/10');
-        confirm.classList.add('border-red-500/40', 'bg-red-500/10');
-        confirm.querySelector('p').textContent = 'Falta un detalle ⚠️';
-        confirm.querySelector('p').className = 'text-sm font-bold text-red-400';
-        confirmText.textContent = 'Por favor selecciona un tipo de llavero.';
-        confirm.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-      }
+      pkgName.value = opt.dataset.pkg;
+      pkgPrice.value = opt.dataset.price;
+      totalAmount.textContent = '$' + opt.dataset.price;
+      totalLabel.textContent = opt.dataset.pkg;
+    }
 
-      const artist = document.getElementById('artist').value;
-      const song = document.getElementById('song').value;
+    pkgOptions.forEach((opt) => opt.addEventListener('click', () => selectPackage(opt)));
 
-      confirm.classList.remove('hidden', 'border-red-500/40', 'bg-red-500/10');
-      confirm.classList.add('border-spotify-green/40', 'bg-spotify-green/10');
-      confirm.querySelector('p').textContent = '¡Listo! 🎉';
-      confirm.querySelector('p').className = 'text-sm font-bold text-spotify-greenLight';
-      confirmText.textContent = `Recibimos tu pedido de "${song}" de ${artist} en formato ${keychainInput.value}. Te contactaremos pronto para confirmar.`;
-      confirm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Preseleccionar "Más vendido" (2 Mini CDs) para una experiencia viva
+    selectPackage(document.querySelector('[data-pkg="2 Mini CDs"]'));
 
-      form.querySelector('button[type="submit"]').textContent = '✓ Pedido enviado';
+    // ---------- Botón WhatsApp ----------
+    const whatsappBtn = document.getElementById('whatsappBtn');
+    const formAlert = document.getElementById('formAlert');
+
+    function showAlert(msg) {
+      formAlert.textContent = '⚠️ ' + msg;
+      formAlert.classList.remove('hidden');
+      formAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    whatsappBtn.addEventListener('click', () => {
+      const artist = artistInput.value.trim();
+      const song = songInput.value.trim();
+      const spotify = spotifyInput.value.trim();
+      const keychain = keychainInput.value;
+      const pkg = pkgName.value;
+      const price = pkgPrice.value;
+
+      // Validaciones mínimas
+      if (!artist) { showAlert('Escribe el nombre del artista o álbum.'); artistInput.focus(); return; }
+      if (!song) { showAlert('Escribe tu canción favorita.'); songInput.focus(); return; }
+      if (!keychain) { showAlert('Selecciona el tipo de llavero (cadena o aro).'); return; }
+      if (!pkg) { showAlert('Elige un paquete para continuar.'); return; }
+
+      formAlert.classList.add('hidden');
+
+      // Mensaje limpio y formateado
+      const lines = [
+        '¡Hola Plan Simple! Quiero armar mi pedido 🎶',
+        '',
+        '📀 *Paquete:* ' + pkg + ' ($' + price + ')',
+        '🎤 *Artista / Álbum:* ' + artist,
+        '🎵 *Canción:* ' + song,
+        '🔑 *Tipo de llavero:* ' + keychain,
+        '🔗 *Spotify:* ' + (spotify || 'Se lo comparto por aquí'),
+        '',
+        '¿Me ayudas a confirmar disponibilidad y entrega? ¡Gracias! 💚',
+      ];
+      const url = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(lines.join('\n'));
+      window.open(url, '_blank');
     });
   </script>
 </body>
