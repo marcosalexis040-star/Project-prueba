@@ -272,9 +272,17 @@
             <svg class="h-4 w-4 text-spotify-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19a3 3 0 11-6 0 3 3 0 016 0zM21 16a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             Nombre del Artista / Álbum
           </label>
-          <input id="artist" name="artist" type="text" required maxlength="28"
-            placeholder="Ej. Bad Bunny — Un Verano Sin Ti"
-            class="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder-spotify-gray/60 outline-none transition focus:border-spotify-green focus:ring-2 focus:ring-spotify-green/30" />
+          <div class="relative">
+            <input id="artist" name="artist" type="text" required maxlength="40" autocomplete="off"
+              placeholder="Ej. Bad Bunny — Un Verano Sin Ti"
+              class="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3.5 pr-10 text-sm text-white placeholder-spotify-gray/60 outline-none transition focus:border-spotify-green focus:ring-2 focus:ring-spotify-green/30" />
+            <!-- spinner de búsqueda en vivo -->
+            <span id="searchSpinner" class="absolute right-3.5 top-1/2 hidden -translate-y-1/2">
+              <span class="block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-spotify-green"></span>
+            </span>
+            <!-- Resultados en vivo de Spotify -->
+            <ul id="searchResults" class="absolute left-0 right-0 top-full z-40 mt-2 hidden max-h-72 overflow-y-auto rounded-2xl border border-white/10 bg-spotify-dark/95 p-1.5 shadow-2xl backdrop-blur-xl"></ul>
+          </div>
         </div>
 
         <!-- Canción favorita -->
@@ -712,6 +720,91 @@
       iTunesCover(q);
     }
 
+    // ===== Búsqueda EN VIVO vía backend (Spotify API, Client Credentials) =====
+    // Si index.html se abre con file://, apunta al servidor local; si lo sirve
+    // el propio backend (http://localhost:3000), usa rutas relativas.
+    const API_BASE = location.protocol === 'file:' ? 'http://localhost:3000' : '';
+    const searchResults = document.getElementById('searchResults');
+    const searchSpinner = document.getElementById('searchSpinner');
+    let searchAbort = null;
+    let backendDown = false; // si el backend no responde, usamos el respaldo offline
+
+    function hideResults(){ searchResults.classList.add('hidden'); searchResults.innerHTML = ''; }
+    function spinner(on){ searchSpinner.classList.toggle('hidden', !on); }
+
+    async function backendSearch(q){
+      if (searchAbort) searchAbort.abort();
+      searchAbort = new AbortController();
+      const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(q)}&type=album,track&limit=6`, { signal: searchAbort.signal });
+      if (!res.ok) throw new Error('backend ' + res.status);
+      const data = await res.json();
+      return data.results || [];
+    }
+
+    function renderResults(items){
+      if (!items.length){ hideResults(); return; }
+      searchResults.innerHTML =
+        '<li class="px-2.5 pb-1.5 pt-1 text-[9px] font-bold uppercase tracking-[0.18em] text-spotify-green">⚡ En vivo desde Spotify</li>' +
+        items.slice(0, 8).map((it, i) =>
+          `<li><button type="button" data-i="${i}" class="result-btn flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition hover:bg-white/10 active:scale-[0.99]">
+             <img src="${it.image}" alt="" class="h-10 w-10 shrink-0 rounded-md object-cover bg-white/5" />
+             <span class="min-w-0 flex-1">
+               <span class="block truncate text-[13px] font-bold text-white">${escapeHtml(it.title)}</span>
+               <span class="block truncate text-[11px] text-spotify-gray">${escapeHtml(it.artist)}</span>
+             </span>
+             <span class="shrink-0 rounded-full bg-white/5 px-2 py-0.5 text-[9px] uppercase tracking-wide text-spotify-gray">${it.type === 'album' ? 'Álbum' : 'Canción'}</span>
+           </button></li>`
+        ).join('');
+      searchResults.classList.remove('hidden');
+      searchResults.querySelectorAll('.result-btn').forEach((btn) => {
+        btn.addEventListener('click', () => selectResult(items[parseInt(btn.dataset.i, 10)]));
+      });
+    }
+    function escapeHtml(s){ return (s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    // Previsualiza la portada del primer resultado mientras se escribe
+    function previewTop(item){
+      if (currentLinkCover || !item || !item.image) return;
+      setCover(item.image, 'Portada real de Spotify ✓');
+      catalogQRTarget = item.url;
+      if (!spotifyUrlOk(spotifyInput.value.trim())) setQR(item.url);
+    }
+
+    // Al elegir un resultado: fija portada + autocompleta artista + link + QR
+    function selectResult(item){
+      if (!item) return;
+      currentLinkCover = true;
+      setCover(item.image, 'Portada real + QR de tu canción ✓');
+      artistInput.value = item.title;
+      previewArtist.textContent = item.title;
+      if (item.url){
+        spotifyInput.value = item.url;
+        spotifyCheck.classList.remove('hidden');
+        setQR(item.url);
+      }
+      hideResults();
+    }
+
+    // Orquesta la búsqueda: backend primero, respaldo offline (catálogo/iTunes)
+    async function runSearch(){
+      const q = artistInput.value.trim();
+      if (normalize(q).length < 2){ hideResults(); spinner(false); if (!currentLinkCover) tryNameCover(); return; }
+      if (backendDown){ tryNameCover(); return; }
+      try {
+        spinner(true);
+        const items = await backendSearch(q);
+        spinner(false);
+        if (items.length){ renderResults(items); previewTop(items[0]); }
+        else { hideResults(); tryNameCover(); }
+      } catch (e) {
+        spinner(false);
+        if (e.name === 'AbortError') return; // petición reemplazada por otra más nueva
+        backendDown = true; // backend apagado o sin credenciales → respaldo offline
+        hideResults();
+        tryNameCover();
+      }
+    }
+
     // ----- Disparadores (con debounce, fluido en celular) -----
     let coverTimer, nameTimer;
     spotifyInput.addEventListener('input', () => {
@@ -723,12 +816,16 @@
         if (currentLinkCover) { currentLinkCover = false; clearCover(); }
         setQR(catalogQRTarget || '');
         clearTimeout(nameTimer);
-        nameTimer = setTimeout(tryNameCover, 200);
+        nameTimer = setTimeout(runSearch, 200);
       }
     });
     artistInput.addEventListener('input', () => {
       clearTimeout(nameTimer);
-      nameTimer = setTimeout(tryNameCover, 550);
+      nameTimer = setTimeout(runSearch, 320);
+    });
+    // Cierra el dropdown al tocar fuera
+    document.addEventListener('click', (e) => {
+      if (!searchResults.contains(e.target) && e.target !== artistInput) hideResults();
     });
 
     // ---------- Paquetes / precios dinámicos ----------
